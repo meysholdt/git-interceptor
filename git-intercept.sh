@@ -65,6 +65,7 @@ log_and_exec() {
     echo
     echo "----- $(date '+%F %T') ----------------------------------------"
     echo "PID: $$"
+    echo "USER: $(whoami)"
     echo "ARGS: $*"
     echo "Process tree:"
     ps auxf
