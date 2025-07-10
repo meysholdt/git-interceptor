@@ -9,12 +9,12 @@
 #   git <anything>   # behaves exactly like the real git
 #
 # LOG FILE:
-#   By default:  $HOME/git_intercept.log
+#   By default:  /var/log/git-interceptor/git_intercept.log
 #   Override:    export GIT_INTERCEPT_LOG=/path/to/file
 #
 set -euo pipefail
 
-LOGFILE="${GIT_INTERCEPT_LOG:-$HOME/git_intercept.log}"
+LOGFILE="${GIT_INTERCEPT_LOG:-/var/log/git-interceptor/git_intercept.log}"
 SELF="$(readlink -f "$0")"
 SELF_DIR="$(dirname "$SELF")"
 REAL_GIT="$SELF_DIR/git.real"            # path we’ll look for after install
@@ -38,6 +38,15 @@ install_wrapper() {
     exit 0
   fi
 
+  # create log directory and set permissions
+  local log_dir
+  log_dir="$(dirname "$LOGFILE")"
+  echo "Creating log directory: $log_dir"
+  sudo mkdir -p "$log_dir"
+  sudo chmod 777 "$log_dir"
+  sudo touch "$LOGFILE"
+  sudo chmod 666 "$LOGFILE"
+
   # rename original
   local real_git="${git_dir}/git.real"
   if [[ -e "$real_git" ]]; then
@@ -52,6 +61,7 @@ install_wrapper() {
   install -m 0755 "$SELF" "$git_path"
 
   echo "✔ Installation complete."
+  echo "Log file: $LOGFILE"
 }
 
 log_and_exec() {
